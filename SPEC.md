@@ -1,13 +1,15 @@
 # Pathways: Next-Step Slice Agent Specification
 
 ## 1. Outcome
-Build a mobile-first, single-file Python CLI application (or lightweight Flask/FastAPI HTML app) that acts as an AI guide to help "Dani" (17, HS Senior) choose a next step. The app must process synthetic data, enforce a strict data boundary for minors, and output a grounded recommendation.
+Build a single-file Python application that acts as an AI guide for "Dani" (17, HS Senior). Do NOT build an interactive terminal menu or ask the user to select an interest ID from a list. Instead, hardcode Dani's pre-built local profile into the `main()` function: she prefers "hands-on work" and needs a next step "before winter break". The app must safely extract these preferences, process them against the synthetic data, and output a grounded recommendation.
 
 ## 2. Constraints & Rules (CRITICAL)
-- **Minors' Data Boundary:** The user's name ("Dani"), age ("17"), and any free-text "Note to Advisor" MUST NOT be sent to the LLM. Create a strict filtering layer before the LLM call.
-- **Mocked LLM:** Do not use OpenAI/Anthropic APIs. Create a `mock_llm(prompt)` function that simulates a response. 
-- **Audit Logging:** Every call to `mock_llm` must append the exact prompt and response to a local file named `model-calls.log`.
-- **Grounded & Silent:** The LLM output can only use the provided synthetic data. It must explicitly cite the `ID` and `Last checked` date (e.g., "").
+- **Minors' Data Boundary:** The user's name ("Dani"), age (17), and any raw free-text "Note to Advisor" MUST NOT be sent to the LLM. 
+- **Payload Extraction:** Create a `sanitize_for_llm` function that takes the pre-built profile, strips the PII, and extracts only a safe `preference` (e.g., "hands-on") and `timeline` (e.g., "before winter break"). Pass ONLY these safe variables and the synthetic data table to the model.
+- **No Forced Choice UI:** The system must use the LLM (not a user input menu) to evaluate the extracted timeline and preference against the program deadlines (specifically PRG-02's Nov 30 deadline) to make a recommendation.
+- **Mocked LLM:** Do not use OpenAI/Anthropic APIs. Create a `mock_llm(safe_payload)` function that simulates rule-based routing based on the extracted timeline and preference. 
+- **Audit Logging:** Every call to `mock_llm` must append the exact JSON payload and response to a local file named `model-calls.log`.
+- **Grounded & Silent:** The LLM output must explicitly cite the `ID` and `Last checked` date (e.g., "(Source ID: PRG-02, Last checked: Oct 20, 2026)").
 - **Handling Unknowns:** If a detail is missing (e.g., specific start dates not in the table, exact aid amounts), the system must state it cannot confirm and explicitly offer the advisor hand-off (ID: ADV-01).
 
 ## 3. Acceptance Criteria (Automated Checks)

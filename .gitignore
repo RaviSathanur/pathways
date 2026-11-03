@@ -1,5 +1,4 @@
 __pycache__/
 *.py[cod]
-model-calls.log
 .venv/
 venv/
